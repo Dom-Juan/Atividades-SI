@@ -6,7 +6,6 @@
 """
 
 import socket as s
-import threading as thread
 import os
 import json
 

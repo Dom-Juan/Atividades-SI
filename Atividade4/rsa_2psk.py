@@ -14,9 +14,9 @@ class RSA:
     self.p = p
     self.q = q
     self.n = 0
-    self.euler_toitent = 0
-    self.public_key = 0
-    self.private_key = 0
+    self.euler_totient = 0
+    self.public_key = []
+    self.private_key = []
     self.e = 0
     self.table = {'a': "101", 'b': "102", 'c': "103", 'd': "104", 'e': "105", 'f': "106", 'g': "107", 'h': "108", 
       'i': "109", 'j': "110", 'k': "111", 'l': "112", 'm': "113", 'n': "114", 'o': "115", 'p': "116", 
@@ -30,36 +30,53 @@ class RSA:
   def calc_n(self):
     self.n = self.p * self.q
   
-  def calc_euler_toitent(self):
-    self.euler_toitent = (self.p - 1) * (self. q - 1)
+  def calc_euler_totient(self):
+    self.euler_totient = (self.p - 1) * (self. q - 1)
   
   def calc_public_key(self):
     coprimes = [
-      x for x in range(2, self.euler_toitent) if(math.gcd(x, self.euler_toitent) == 1)
+      x for x in range(2, self.euler_totient) if(math.gcd(x, self.euler_totient) == 1)
     ]
     self.e = coprimes[randint(0, len(coprimes) - 1)]
+    print(f"Coprimo e:{self.e}")
     self.public_key = [self.n, self.e]
     return self.public_key
   
+  def calc_private_key(self):
+    d, text = 0, []
+    for k in range(1, self.e):
+      if (k * self.euler_totient + 1) % self.e == 0:
+        d = (k * self.euler_totient + 1) // self.e
+        break
+    self.private_key = [self.n, d]
+    return self.private_key
+
   def encrypt_message(self, message):
     return [
       int(pow(int(self.table[i]), self.public_key[1], self.public_key[0]))
       for i in message
     ]
   
-  def calc_private_key(self):
-    d = 0
-    for k in range(1, self.e):
-      if (k * self.euler_toitent + 1) % self.e == 0:
-        d = (k * self.euler_toitent + 1) // self.e
-        break
-    print(d)
-
+  def decrypt_message(self, message):
+    array = [
+      int(pow(int(i), self.private_key[1], self.n))
+      for i in message
+    ]
+    decrypted_message = ""
+    for i in array:
+      for k, v in self.table.items():
+        if(int(v) == i):
+          decrypted_message += str(k)
+          break
+    return decrypted_message
 
 if __name__ == '__main__':
   rsa_alg = RSA(17, 41)
   rsa_alg.calc_n()
-  rsa_alg.calc_euler_toitent()
-  print(rsa_alg.calc_public_key())
-  print(rsa_alg.encrypt_message("teste"))
-  rsa_alg.calc_private_key()
+  rsa_alg.calc_euler_totient()
+  print(f"Chave privada {rsa_alg.calc_public_key()}")
+  message = rsa_alg.encrypt_message("teste")
+  print(f"A mensagem encryptada é: {message}")
+  print(f"Chave privada {rsa_alg.calc_private_key()}")
+  print(f"Mensagem descriptografada: {rsa_alg.decrypt_message(message)}")
+  
