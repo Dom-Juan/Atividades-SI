@@ -8,7 +8,7 @@
 import math
 from random import randint
 
-MAX = 10000;
+MAX = 10000
 # Array para armazenar primos mais próximos de até 10^6 de tamanho.
 
 # checagem se os números são primos.
@@ -32,12 +32,12 @@ def sieve(primes):
   n = MAX;
   # No geral a função de Sieve of Sundaram produz uma quantidade de números primos menores que 2 * x + 2
   # dadao um x qualquer, vamos usar a chave do DH para gerar o mesmo número primo próximo para usar na chave do RSA.
-  nNew = int(math.sqrt(n));
+  n_new = int(math.sqrt(n));
   # Este array é usado para separar numeros na forma: i + j + 2*i*j dos outros onde 1 <= i <= j
   marked = [0] * (int(n / 2 + 500));
   # elimina os indexes que não são iguais
   # produção de primos
-  for i in range(1, int((nNew - 1) / 2) + 1):
+  for i in range(1, int((n_new - 1) / 2) + 1):
       for j in range(((i * (i + 1)) << 1), (int(n / 2) + 1), (2 * i + 1)): marked[j] = 1;
   # Como 2 é o primeiro número primoSince 2 is a prime number
   primes.append(2);

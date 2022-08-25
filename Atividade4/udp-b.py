@@ -14,10 +14,9 @@ import threading as thread
 # Import de bibliotecas locais
 from rsa_2psk import RSA
 from dh import DiffieHellman, gen_prime_numbers, binary_search, sieve
-#os.system("cls")
 
 print('\n[===================================================]\n')
-print('\t\t Chat com Criptografia - DH e RSA')
+print('\t Chat com Criptografia - DH e RSA')
 print('\n[===================================================]\n')
 
 # Setando o ip e porta da conexão atual.
@@ -72,7 +71,7 @@ print("P e Q do RSA", p_rsa, q_rsa)
 person_b_rsa = RSA(p_rsa, q_rsa)
 person_b_rsa.calc_n()
 person_b_rsa.calc_euler_totient()
-person_b_rsa.calc_public_key(diffie_hellman.key)
+person_b_rsa.calc_public_key(diffie_hellman.key)  # passa a chave do diffie_hellman como parametro parar escolher o co-primo.
 person_b_rsa.calc_private_key()
 
 # Realiza o envio de dados:
@@ -98,6 +97,10 @@ def connection():
     try:
       data = str(input("["+str(target_ip)+"@"+str(target_port)+"]: ")).encode() # encriptando os dados.
       if data.decode() in {'[quit]', '[sair]'}:
+        data = person_b_rsa.encrypt_message("Cliente foi desconectado...")  # encriptando a mensagem string com o RSA.
+        encrypted_data = json.dumps({"data": data})         # enpacotando em json.
+        encrypted_data = encrypted_data.encode()            # Encoding parar bytes da mensagem em json "compactada".
+        s1.sendto(encrypted_data, (target_ip, target_port)) # envia as informações para o alvo.
         s1.close()
         os._exit(1) # termina o processo
       print(data.decode())

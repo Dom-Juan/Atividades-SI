@@ -6,7 +6,6 @@
 """
 
 import math
-#from random import randint
 
 class RSA:
   def __init__(self, p, q):
@@ -39,11 +38,11 @@ class RSA:
     self.euler_totient = (self.p - 1) * (self. q - 1)
   
   def calc_public_key(self, index):
-    # Geração de coprimos, para cada x dentro do intervalo de 2 até euler totient, verificar se ele é co primo do euler totient
+    # Geração de co-primos, para cada x dentro do intervalo de 2 até euler totient, verificar se ele é co primo do euler totient
     coprimes = [
       x for x in range(2, self.euler_totient) if(math.gcd(x, self.euler_totient) == 1)
     ]
-    # Escolhendo um co primo baseado na chave resultante do DH.
+    # Escolhendo um co-primo baseado na chave resultante do DH.
     self.e = coprimes[index]
     self.public_key = [self.n, self.e]
     return self.public_key
@@ -51,6 +50,7 @@ class RSA:
   def calc_private_key(self):
     d, text = 0, []
     # Geração da chave privada.
+    
     for k in range(1, self.e):
       if (k * self.euler_totient + 1) % self.e == 0:  # verifica se k pode pertenceer ao intervalo que queremos para calcular nosso d.
         d = (k * self.euler_totient + 1) // self.e    # se ele pertencer, calcule D e saia do loop.
@@ -60,6 +60,7 @@ class RSA:
 
   def encrypt_message(self, message):
     # retornando um vetor onde cada posição é um char encriptado.
+    # para cada char na mensagem procurar o valor correspodente da tupla e calcular valor^public_key % n
     return [
       int(pow(int(self.table[i]), self.public_key[1], self.public_key[0]))
       for i in message
@@ -69,6 +70,7 @@ class RSA:
     # Mostrando a chave privada do usuario
     print(f"Chave privada e n: {self.private_key} {self.n}")
     # Fazendo o calculo do reverso com a chave privada.
+    # para cada valor da string message convertido para inteiro, calcular valor^private_key % n
     array = [
       int(pow(int(i), self.private_key[1], self.n))
       for i in message
@@ -76,9 +78,9 @@ class RSA:
     decrypted_message = ""
     # para o tamanho da nossa mensagem, procurar os simbolos correspondentes na tabela de simbolos.
     for i in array:
-      for k, v in self.table.items():
-        if(int(v) == i):
-          decrypted_message += str(k)
+      for k, v in self.table.items(): # para todos items da tupla, pegar uma chave e valor em um loop de 0 até n-1.
+        if(int(v) == i):  # valor da tabela equivale ao o i.
+          decrypted_message += str(k) # adiciona a chave da tabela de tuplas, construindo nossa string.
           break
     return decrypted_message
 

@@ -8,7 +8,7 @@
 import math
 from random import randint
 
-MAX = 10000;
+MAX = 10000
 # Array para armazenar primos mais próximos de até 10^6 de tamanho.
 
 # checagem se os números são primos.
