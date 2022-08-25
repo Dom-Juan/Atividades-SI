@@ -10,12 +10,13 @@ import threading as thread
 import os
 import json
 
-from dh import DiffieHellman, gen_prime_numbers, is_prime
+from rsa_2psk import RSA
+from dh import DiffieHellman, gen_prime_numbers, binary_search, sieve
 from _thread import *
 #os.system("cls")
 
 print('\n[===================================================]\n')
-print('\t\t Criptografia com DH')
+print('\t\t Chat com Criptografia - DH e RSA')
 print('\n[===================================================]\n')
 
 # Setando o ip e porta da conexão atual.
@@ -35,6 +36,10 @@ p = response[0]
 q = response[1]
 diffie_hellman = DiffieHellman(p, q, secret)
 diffie_hellman.calc_x() # Calculo do diffie hellman
+primes = sieve([])
+
+p_rsa = p
+q_rsa = q
 
 def gen_keys():
   print("Esperando cliente 1")
@@ -51,10 +56,17 @@ def gen_keys():
   s1.sendto(e, (target_ip, target_port)) # envia as informações para o alvo.
   diffie_hellman.set_incoming_x(data1) # set no valor Y para calcular o PSK
   diffie_hellman.generate_psk()             # Calculando o PSK
-  # Vinculando o socket agora:
-  return True
+  # Calculando as chaves do RSA
+  return binary_search(0, len(primes) - 1, diffie_hellman.key, primes)
 
-gen_keys()
+key_rsa = gen_keys()
+print(key_rsa)
+print("P e Q do RSA", p_rsa, q_rsa)
+person_b_rsa = RSA(p_rsa, q_rsa)
+person_b_rsa.calc_n()
+person_b_rsa.calc_euler_totient()
+person_b_rsa.calc_public_key(diffie_hellman.key)
+person_b_rsa.calc_private_key()
 
 # Realiza o envio de dados:
 def connection():
@@ -71,7 +83,7 @@ def connection():
       msg = msg[0].decode()   # Decode da mensagem em bytes.
       data = json.loads(msg)  # "Descompactando" o json enviado.
       msg = data.get("data")  # pegando a chave da criptografia.
-      decrypted_message = diffie_hellman.decrypt_with_key(msg, diffie_hellman.key)
+      decrypted_message = person_b_rsa.decrypt_message(msg)
       print("\n Recebido de ["+str(target_ip)+"@"+str(target_port)+"]: ", decrypted_message)
     except s.error: # passa o erro para ser printado caso este ocorra.
       print("Erro na conexão...", s.error)
@@ -82,8 +94,8 @@ def connection():
         s1.close()
         os._exit(1) # termina o processo
       print(data.decode())
-      data = diffie_hellman.encrypt_with_key(data.decode(), diffie_hellman.key)
-      encrypted_data = json.dumps({"data": data, "incoming_x": diffie_hellman.get_x()})
+      data = person_b_rsa.encrypt_message(data.decode())
+      encrypted_data = json.dumps({"data": data})
       encrypted_data = encrypted_data.encode()  # Encoding parar bytes da mensagem em json "compactada"
       s1.sendto(encrypted_data, (target_ip, target_port)) # envia as informações para o alvo.
       # se o texto enviado for um comando, sai do chat.
