@@ -18,8 +18,8 @@ def is_prime(number):
 # geração de dois números primos grandes
 def gen_prime_numbers():
   while(True):
-    p = int(input("Digite o primeiro número primo grande\n>:"))
-    q = int(input("Digite o primeiro número primo grande\n>:"))
+    p = int(input("[p] Digite o primeiro número primo grande\n>:"))
+    q = int(input("[q] Digite o primeiro número primo grande\n>:"))
     if(p * q < 400):
       print("Os números pequenos")
     elif(p == q): print("Os números são iguais")

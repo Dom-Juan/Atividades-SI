@@ -79,7 +79,7 @@ class RSA:
     # para o tamanho da nossa mensagem, procurar os simbolos correspondentes na tabela de simbolos.
     for i in array:
       for k, v in self.table.items(): # para todos items da tupla, pegar uma chave e valor em um loop de 0 até n-1.
-        if(int(v) == i):  # valor da tabela equivale ao o i.
+        if(int(v) == i):              # valor da tabela equivale ao o i.
           decrypted_message += str(k) # adiciona a chave da tabela de tuplas, construindo nossa string.
           break
     return decrypted_message

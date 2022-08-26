@@ -31,7 +31,7 @@ s1 = s.socket(s.AF_INET, s.SOCK_DGRAM) # cria o socket com conexão UDP.
 s1.bind((ip, port)) # vincula a porta e ip a este socket.
 
 # Input do segredo do DH.
-secret = int(input("Digite seu secret_key >: "))
+secret = int(input("Digite seu secret_key >: "))  # chave privada
 response = gen_prime_numbers() # gerando numéros primos q atendam as condições p * q > 400, p != q e p e q serem primos.
 p = response[0] # p pego
 q = response[1] # q pego
@@ -55,13 +55,13 @@ def gen_keys():
   print(f"Sua Chave pública: {diffie_hellman.get_x()}")
   print("\n Chave pública de ["+str(addr)+"@]:", data1)
   print(type(data1))
-  e = json.dumps({"incoming_x": diffie_hellman.get_x()})
+  e = json.dumps({"incoming_x": diffie_hellman.get_x()})  # Empacotando a chave intermediaria em json para ser enviada
   e = e.encode()                            # Encoding parar bytes da mensagem em json "compactada"
   s1.sendto(e, (target_ip, target_port))    # envia as informações para o alvo.
   diffie_hellman.set_incoming_x(data1)      # set no valor Y para calcular o PSK.
   diffie_hellman.generate_psk()             # Calculando o PSK.
   # Retornando o primo mais próximo, não utilizado no algoritmo, realizado outra lógica.
-  return binary_search(0, len(primes) - 1, diffie_hellman.key, primes)
+  #return binary_search(0, len(primes) - 1, diffie_hellman.key, primes)
 
 # chamando a função para trocar as chaves com o DH cusando socket.
 gen_keys()
@@ -69,10 +69,10 @@ gen_keys()
 print("P e Q do RSA", p_rsa, q_rsa)
 # Iniciando a classe RSA e começando o cálculo.
 person_b_rsa = RSA(p_rsa, q_rsa)
-person_b_rsa.calc_n()
-person_b_rsa.calc_euler_totient()
-person_b_rsa.calc_public_key(diffie_hellman.key)  # passa a chave do diffie_hellman como parametro parar escolher o co-primo.
-person_b_rsa.calc_private_key()
+person_b_rsa.calc_n()             # calculando o n = p * p.
+person_b_rsa.calc_euler_totient() # calculando o euler totient = p - 1 * q - 1.
+person_b_rsa.calc_public_key(diffie_hellman.key) # passa a chave do diffie_hellman como parametro parar escolher o co-primo e calcular a chave pública.
+person_b_rsa.calc_private_key()                  # calcula a chave privada para desencriptar as mensagens.
 
 # Realiza o envio de dados:
 def connection():
@@ -96,7 +96,7 @@ def connection():
     encrypted_data = ""
     try:
       data = str(input("["+str(target_ip)+"@"+str(target_port)+"]: ")).encode() # encriptando os dados.
-      if data.decode() in {'[quit]', '[sair]'}:
+      if data.decode() in {'[quit]', '[sair]'}:                             # caso esse comando seja digitado, sair do programa.
         data = person_b_rsa.encrypt_message("Cliente foi desconectado...")  # encriptando a mensagem string com o RSA.
         encrypted_data = json.dumps({"data": data})         # enpacotando em json.
         encrypted_data = encrypted_data.encode()            # Encoding parar bytes da mensagem em json "compactada".
